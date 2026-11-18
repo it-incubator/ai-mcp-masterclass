@@ -1,0 +1,12 @@
+@startuml C4_Context_Step02
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context Diagram — Ledger Admin (step 02: use cases)
+
+Person(operator, "Back-office operator", "Manages customers, accounts and transactions of a small fintech through the admin panel")
+
+System(ledger, "Ledger Admin", "Fintech back-office: customers with KYC, accounts, deposits, withdrawals, transfers with four-eyes approval, summary report")
+
+Rel(operator, ledger, "Opens pages, fills forms, approves transfers")
+
+@enduml

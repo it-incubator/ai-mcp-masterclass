@@ -1,0 +1,76 @@
+@startuml C4_Component_Backend_Step02
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram — Backend API (step 02: use cases)
+
+Container(web, "Web Admin", "React 19 SPA served by Nginx", "Admin panel")
+ContainerDb(db, "Database", "PostgreSQL 16", "Customers, accounts and transactions")
+
+Container_Boundary(api, "Backend API — NestJS") {
+    Component(bootstrap, "Bootstrap", "NestJS AppModule and main.ts", "Global prefix /api, ValidationPipe, CORS, Swagger, CqrsModule wiring")
+
+    Boundary(pres_mod, "Presentation: HTTP", "Module") {
+        Component(customers_ctrl, "Customers Controller", "NestJS Controller", "Thin: DTO in, command or query out")
+        Component(accounts_ctrl, "Accounts Controller", "NestJS Controller", "Thin: DTO in, command or query out")
+        Component(tx_ctrl, "Transactions Controller", "NestJS Controller", "Thin: DTO in, command or query out")
+        Component(reports_ctrl, "Reports Controller", "NestJS Controller", "Thin: dispatches GetSummaryReport")
+        Component(dtos, "Request DTOs", "TypeScript Classes with class-validator", "HTTP-only validation and Swagger schemas")
+        Component(exc_filter, "Domain Exception Filter", "NestJS ExceptionFilter", "Maps domain errors to 400/404/409/422 with the same messages")
+    }
+
+    Boundary(app_mod, "Application: use cases", "Module") {
+        Component(buses, "Command Bus and Query Bus", "@nestjs/cqrs", "Routes each command or query to exactly one handler")
+        Component(customer_uc, "Customer use cases", "TypeScript Classes (CQRS handlers)", "ListCustomers, GetCustomer, CreateCustomer, UpdateCustomer, SetKycStatus, DeleteCustomer")
+        Component(account_uc, "Account use cases", "TypeScript Classes (CQRS handlers)", "ListAccounts, GetAccount, OpenAccount, FreezeAccount, UnfreezeAccount, CloseAccount")
+        Component(tx_uc, "Transaction use cases", "TypeScript Classes (CQRS handlers)", "ListTransactions, GetTransaction, Deposit, Withdraw, Transfer, ApproveTransaction, RejectTransaction, ReverseTransaction")
+        Component(report_uc, "Report use case", "TypeScript Class (CQRS handler)", "GetSummaryReport")
+    }
+
+    Boundary(domain_mod, "Domain rules", "Module") {
+        Component(rules, "Business rules", "TypeScript Modules", "customer.rules, account.rules, transaction.rules: KYC gate, account state guards, four-eyes threshold, reverse rules")
+        Component(errors, "Domain errors", "TypeScript Classes", "NotFound, Conflict, BusinessRule, Validation errors")
+        Component(money, "Money", "TypeScript Module", "Integer-cents math and currency/enum types")
+    }
+
+    Boundary(infra_mod, "Infrastructure", "Module") {
+        Component(entities, "Entities", "TypeORM Entities", "Customer, Account, Transaction")
+        Component(locks, "Account locks", "TypeScript Module (TypeORM)", "Pessimistic write locks in id order")
+        Component(dev_ctrl, "Dev Controller and Seed", "NestJS Controller and TypeScript Module", "POST /dev/reset, deterministic demo data")
+        Component(health_ctrl, "Health Controller", "NestJS Controller", "GET /health")
+    }
+}
+
+Rel(web, customers_ctrl, "REST", "JSON/HTTP")
+Rel(web, accounts_ctrl, "REST", "JSON/HTTP")
+Rel(web, tx_ctrl, "REST", "JSON/HTTP")
+Rel(web, reports_ctrl, "REST", "JSON/HTTP")
+
+Rel(customers_ctrl, dtos, "Validates input with")
+Rel(accounts_ctrl, dtos, "Validates input with")
+Rel(tx_ctrl, dtos, "Validates input with")
+Rel(customers_ctrl, buses, "execute(Command or Query)")
+Rel(accounts_ctrl, buses, "execute(Command or Query)")
+Rel(tx_ctrl, buses, "execute(Command or Query)")
+Rel(reports_ctrl, buses, "execute(Query)")
+Rel(exc_filter, errors, "Translates")
+
+Rel(buses, customer_uc, "Dispatches to")
+Rel(buses, account_uc, "Dispatches to")
+Rel(buses, tx_uc, "Dispatches to")
+Rel(buses, report_uc, "Dispatches to")
+
+Rel(customer_uc, rules, "Applies")
+Rel(account_uc, rules, "Applies")
+Rel(tx_uc, rules, "Applies")
+Rel(rules, errors, "Throws")
+Rel(rules, money, "Uses")
+Rel(tx_uc, locks, "Locks accounts with")
+
+Rel(customer_uc, entities, "Reads and writes")
+Rel(account_uc, entities, "Reads and writes")
+Rel(tx_uc, entities, "Reads and writes in one DB transaction")
+Rel(report_uc, entities, "Aggregates")
+Rel(dev_ctrl, entities, "Truncates and seeds")
+Rel(entities, db, "Maps to tables", "SQL over TypeORM")
+
+@enduml
