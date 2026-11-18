@@ -1,0 +1,19 @@
+{
+  "name": "ledger-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@playwright/test": "1.49.1",
+    "@types/node": "22.10.2",
+    "typescript": "5.7.2",
+    "zod": "4.6.7"
+  }
+}

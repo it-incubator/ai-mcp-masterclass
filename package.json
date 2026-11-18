@@ -1,0 +1,16 @@
+{
+  "name": "ai-mcp-masterclass",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Master class: admin panel vs AI + MCP (NestJS + React)",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "install:all": "npm --prefix apps/backend install && npm --prefix apps/frontend install && npm --prefix e2e install",
+    "dev:db": "docker compose up -d db",
+    "dev:backend": "npm --prefix apps/backend run start:dev",
+    "dev:frontend": "npm --prefix apps/frontend run dev",
+    "build": "npm --prefix apps/backend run build && npm --prefix apps/frontend run build",
+    "e2e": "npm --prefix e2e test",
+    "reset-data": "curl -fsS -X POST http://localhost:3000/api/dev/reset"
+  }
+}
