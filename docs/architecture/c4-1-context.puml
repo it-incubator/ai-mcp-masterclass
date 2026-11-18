@@ -1,0 +1,15 @@
+@startuml C4_Context_Step03
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context Diagram — Ledger Admin (step 03: use cases + MCP)
+
+Person(operator, "Back-office operator", "Manages customers, accounts and transactions of a small fintech, through the admin panel or by talking to an AI assistant")
+
+System(ledger, "Ledger Admin", "Fintech back-office: customers with KYC, accounts, deposits, withdrawals, transfers with four-eyes approval, summary report. Exposed to people as a UI and to AI as tools")
+System_Ext(ai, "AI assistant", "Claude Code or Claude Desktop acting as an MCP client; turns a plain-language request into a sequence of tool calls")
+
+Rel(operator, ledger, "Opens pages, fills forms, approves transfers")
+Rel(operator, ai, "Asks in plain language")
+Rel(ai, ledger, "Calls tools to read and change data")
+
+@enduml
