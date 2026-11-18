@@ -1,0 +1,18 @@
+@startuml C4_Container_Step01
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container Diagram — Ledger Admin (step 01: fat controllers)
+
+Person(operator, "Back-office operator", "Manages customers, accounts and transactions")
+
+System_Boundary(ledger, "Ledger Admin") {
+    Container(web, "Web Admin", "React 19 SPA served by Nginx", "Admin panel: dashboard, customers, accounts, transactions")
+    Container(api, "Backend API", "NestJS 11 application (Node.js 22)", "REST API under /api with Swagger. All business logic lives inside controllers")
+    ContainerDb(db, "Database", "PostgreSQL 16", "Customers, accounts and transactions")
+}
+
+Rel(operator, web, "Uses", "HTTPS (browser)")
+Rel(web, api, "Calls REST API (Nginx proxies /api)", "JSON/HTTP")
+Rel(api, db, "Reads and writes", "SQL over TypeORM")
+
+@enduml

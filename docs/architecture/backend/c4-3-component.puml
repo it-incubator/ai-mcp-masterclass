@@ -1,0 +1,50 @@
+@startuml C4_Component_Backend_Step01
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram — Backend API (step 01: fat controllers)
+
+Container(web, "Web Admin", "React 19 SPA served by Nginx", "Admin panel")
+ContainerDb(db, "Database", "PostgreSQL 16", "Customers, accounts and transactions")
+
+Container_Boundary(api, "Backend API — NestJS") {
+    Component(bootstrap, "Bootstrap", "NestJS AppModule and main.ts", "Global prefix /api, ValidationPipe, CORS, Swagger, DB connect with retries, seeds an empty database")
+
+    Boundary(http_mod, "HTTP controllers (logic inside)", "Module") {
+        Component(customers_ctrl, "Customers Controller", "NestJS Controller", "Validation, KYC gate, delete rules, queries and persistence in one class")
+        Component(accounts_ctrl, "Accounts Controller", "NestJS Controller", "Open, freeze, unfreeze, close rules, queries and persistence in one class")
+        Component(tx_ctrl, "Transactions Controller", "NestJS Controller", "Deposit, withdraw, transfer, four-eyes approve/reject, reverse, row locks, DB transactions")
+        Component(reports_ctrl, "Reports Controller", "NestJS Controller", "Summary report aggregation queries")
+        Component(dev_ctrl, "Dev Controller", "NestJS Controller", "POST /dev/reset: truncate and reseed")
+        Component(health_ctrl, "Health Controller", "NestJS Controller", "GET /health")
+    }
+
+    Boundary(shared_mod, "Shared code", "Module") {
+        Component(dtos, "Request DTOs", "TypeScript Classes with class-validator", "Input validation and Swagger schemas")
+        Component(entities, "Entities", "TypeORM Entities", "Customer, Account, Transaction")
+        Component(money, "Money helpers", "TypeScript Module", "Integer-cents math and numeric column transformer")
+        Component(seed, "Seed", "TypeScript Module", "Deterministic demo data")
+    }
+}
+
+Rel(web, customers_ctrl, "REST", "JSON/HTTP")
+Rel(web, accounts_ctrl, "REST", "JSON/HTTP")
+Rel(web, tx_ctrl, "REST", "JSON/HTTP")
+Rel(web, reports_ctrl, "REST", "JSON/HTTP")
+
+Rel(customers_ctrl, dtos, "Validates input with")
+Rel(accounts_ctrl, dtos, "Validates input with")
+Rel(tx_ctrl, dtos, "Validates input with")
+
+Rel(customers_ctrl, entities, "Queries via repositories")
+Rel(accounts_ctrl, entities, "Queries via repositories")
+Rel(tx_ctrl, entities, "Queries and locks via DataSource")
+Rel(reports_ctrl, entities, "Aggregates via query builder")
+Rel(tx_ctrl, money, "Calculates with")
+Rel(accounts_ctrl, money, "Calculates with")
+
+Rel(dev_ctrl, seed, "Reset runs")
+Rel(bootstrap, seed, "Runs on empty database")
+Rel(seed, entities, "Inserts")
+Rel(entities, db, "Maps to tables", "SQL over TypeORM")
+
+@enduml

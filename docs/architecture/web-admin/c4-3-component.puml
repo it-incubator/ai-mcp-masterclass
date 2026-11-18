@@ -1,0 +1,52 @@
+@startuml C4_Component_WebAdmin
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram — Web Admin (identical on all branches)
+
+Container(api, "Backend API", "NestJS 11 application", "REST API under /api")
+
+Container_Boundary(web, "Web Admin — React SPA") {
+    Component(shell, "App Shell", "React Components (App, AppLayout, react-router)", "Routing, left menu, 404 page")
+
+    Boundary(dash_mod, "Dashboard", "Module") {
+        Component(dash_page, "Dashboard Page", "React Component", "Stat cards, pending approvals shortcut")
+    }
+    Boundary(cust_mod, "Customers", "Module") {
+        Component(cust_page, "Customers Page", "React Component", "Filters, table, KYC and delete actions")
+        Component(cust_details, "Customer Details Page", "React Component", "Profile, accounts, open account")
+        Component(cust_forms, "Customer and Account Modals", "React Components (Ant Design Modal)", "New/edit customer, open account")
+    }
+    Boundary(acc_mod, "Accounts", "Module") {
+        Component(acc_page, "Accounts Page", "React Component", "Filters, freeze, unfreeze, close")
+        Component(acc_drawer, "Account Drawer", "React Component (Ant Design Drawer)", "Account with recent transactions")
+    }
+    Boundary(tx_mod, "Transactions", "Module") {
+        Component(tx_page, "Transactions Page", "React Component", "Filters, approve, reject, reverse")
+        Component(tx_modals, "Transaction Modals", "React Components (Ant Design Modal)", "Deposit / Withdraw / Transfer tabs, reject reason")
+    }
+    Boundary(data_mod, "API access", "Module") {
+        Component(hooks, "Query and Mutation Hooks", "TanStack Query v5 hooks", "One hook per endpoint, cache invalidation after mutations")
+        Component(client, "API Client", "TypeScript Module (fetch)", "Typed requests, ApiError with server message")
+    }
+}
+
+Rel(shell, dash_page, "Routes to")
+Rel(shell, cust_page, "Routes to")
+Rel(shell, cust_details, "Routes to")
+Rel(shell, acc_page, "Routes to")
+Rel(shell, tx_page, "Routes to")
+Rel(cust_page, cust_forms, "Opens")
+Rel(cust_details, cust_forms, "Opens")
+Rel(acc_page, acc_drawer, "Opens")
+Rel(tx_page, tx_modals, "Opens")
+Rel(dash_page, hooks, "Uses")
+Rel(cust_page, hooks, "Uses")
+Rel(cust_details, hooks, "Uses")
+Rel(acc_page, hooks, "Uses")
+Rel(tx_page, hooks, "Uses")
+Rel(cust_forms, hooks, "Uses")
+Rel(tx_modals, hooks, "Uses")
+Rel(hooks, client, "Calls")
+Rel(client, api, "REST", "JSON/HTTP")
+
+@enduml
