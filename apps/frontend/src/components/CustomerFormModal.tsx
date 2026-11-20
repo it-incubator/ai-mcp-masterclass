@@ -1,5 +1,4 @@
 import { Button, Form, Input, Modal, Select } from 'antd';
-import { useEffect } from 'react';
 import { useCreateCustomer, useUpdateCustomer } from '../api/hooks/customers';
 import { RISK_LEVELS } from '../api/types';
 import type { Customer, CustomerInput } from '../api/types';
@@ -19,22 +18,17 @@ export function CustomerFormModal({ open, customer, onClose }: Props) {
   const editing = !!customer;
   const pending = create.isPending || update.isPending;
 
-  useEffect(() => {
-    if (!open) return;
-    if (customer) {
-      form.setFieldsValue({
+  // destroyOnHidden remounts the form on every open, so initialValues are applied fresh each time
+  const initialValues: Partial<CustomerInput> = customer
+    ? {
         firstName: customer.firstName,
         lastName: customer.lastName,
         email: customer.email,
         phone: customer.phone ?? '',
         country: customer.country,
         riskLevel: customer.riskLevel,
-      });
-    } else {
-      form.resetFields();
-      form.setFieldsValue({ riskLevel: 'LOW' });
-    }
-  }, [open, customer, form]);
+      }
+    : { riskLevel: 'LOW' };
 
   async function submit(values: CustomerInput) {
     const body: CustomerInput = {
@@ -64,7 +58,7 @@ export function CustomerFormModal({ open, customer, onClose }: Props) {
         </Button>,
       ]}
     >
-      <Form form={form} layout="vertical" onFinish={submit} preserve={false} data-testid="customer-form">
+      <Form form={form} layout="vertical" initialValues={initialValues} onFinish={submit} preserve={false} data-testid="customer-form">
         <Form.Item name="firstName" label="First name" rules={[{ required: true, message: 'First name is required' }]}>
           <Input data-testid="customer-form-first-name" />
         </Form.Item>
