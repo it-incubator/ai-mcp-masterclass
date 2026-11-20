@@ -4,7 +4,7 @@
   "private": true,
   "description": "Ledger Admin backend, step 02: use cases (CQRS) (NestJS 11 + TypeORM + PostgreSQL)",
   "engines": {
-    "node": ">=22"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
     "build": "nest build",

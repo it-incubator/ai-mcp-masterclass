@@ -38,7 +38,7 @@ npm run smoke
 ```
 
 Env (defaults for local dev): `DB_HOST=localhost DB_PORT=5433 DB_USER=ledger DB_PASSWORD=ledger DB_NAME=ledger PORT=3000 ENABLE_DEV_RESET=true`.
-Stale DB volume from another branch/step: `docker compose down -v`.
+Stale DB volume from another branch/step: `npm run db:reset` (from repo root).
 
 ## Notes on the contract
 

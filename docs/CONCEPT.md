@@ -23,15 +23,15 @@ apps/backend      NestJS 11 + TypeORM + PostgreSQL        (REST under /api)
 apps/frontend     React 19 + TS + Vite + TanStack Query + Ant Design + react-router
 e2e               Playwright UI tests (+ MCP smoke test on branch 03)
 docs/             CONCEPT.md, SCENARIOS.md, ARCHITECTURE.md, MASTERCLASS-SCRIPT.md
-docker-compose.yml  db + backend + frontend  (`docker compose up --build`)
+docker-compose.yml  Postgres only  (apps run on the host: `npm run setup`, `npm run dev`)
 scripts/create-branches.sh   builds the 3 git branches (see §6)
 variants/         source snapshots for branches 02 and 03 (see §6)
 ```
 
 Ports: Postgres host `5433` (container 5432), backend `3000`, frontend `5180`
-(nginx in docker; Vite dev server also on 5180). Frontend always talks to `/api` (nginx / Vite proxy → backend).
+(Vite dev server). Frontend always talks to `/api` (Vite proxy → backend).
 
-Root npm scripts: `dev:db`, `dev:backend`, `dev:frontend`, `build`, `e2e`, `reset-data`.
+Root npm scripts: `setup`, `dev`, `dev:db`, `dev:backend`, `dev:frontend`, `db:reset`, `e2e`, `reset-data`.
 
 ## 3. Domain
 
@@ -154,7 +154,7 @@ Every interactive element has `data-testid` (kebab-case, e.g. `customers-table`,
 Each has: UI steps (counted clicks/pages), MCP prompt, expected result.
 
 ## 9. E2E (Playwright, `e2e/`)
-Runs against the running stack (`docker compose up`), `beforeEach` calls `POST /api/dev/reset`. Specs: dashboard,
+Runs against the running stack (`npm run dev`), `beforeEach` calls `POST /api/dev/reset`. Specs: dashboard,
 customers CRUD + KYC, accounts open/freeze/close, transactions deposit/withdraw/transfer, four-eyes approve/reject/reverse,
 scenario 1 and scenario 3 end-to-end through UI. Page-object classes in `e2e/pages`. Single worker (shared DB).
 
@@ -164,7 +164,7 @@ concerns → use cases/CQRS → MCP as second presentation layer → scenario co
 Rendered mp4 copied to `docs/media/`.
 
 ## 11. Risks / decisions
-- Library versions drift → pin versions in package.json; backend Dockerfile uses `node:22-alpine`.
+- Library versions drift → pin versions in package.json.
 - `synchronize: true` and no auth are explicitly demo-only; say so in README.
 - Concurrency: transactions use DB transaction + `pessimistic_write` lock on accounts (ordered by id to avoid deadlock).
 
@@ -173,7 +173,7 @@ Rendered mp4 copied to `docs/media/`.
 # 12. Amendments after review (these OVERRIDE anything above that conflicts)
 
 1. **No npm workspaces.** `apps/backend`, `apps/frontend`, `e2e` are independent npm projects, each with its own `package-lock.json`;
-   docker build context = the app folder. Root `package.json` only has convenience scripts (`npm --prefix ...`). Node 22 (`.nvmrc`, `engines`).
+   Each app is self-contained in its folder. Root `package.json` only has convenience scripts (`npm --prefix ...`). Node 22 (`.nvmrc`, `engines`).
 2. **Transactions list** items additionally include `fromCustomerRiskLevel`, `toCustomerRiskLevel`; filter `customerRiskLevel` (matches either side's owner)
    and `fromCustomerRiskLevel`. **Customers list** gets filter `hasPendingTransactions=true` (owner of an account involved in a PENDING tx).
    Customer list items also include `totalBalanceByCurrency` is NOT required; keep `accountsCount`.
@@ -194,9 +194,8 @@ Rendered mp4 copied to `docs/media/`.
 8. **Transfer currency:** both accounts must have equal currency (else 422); transaction.currency = that currency.
 9. **Money:** compute in integer cents inside code (`Math.round(x*100)`), TypeORM numeric transformer (string → number, rounded 2dp); API numbers.
 10. **Pagination:** default limit 20, **max 100** (clamped → 400 above 100). Frontend selects use `limit=100`.
-11. **Runtime files:** `docker-compose.yml` (db healthcheck, `depends_on: service_healthy`, backend retries DB connect), `apps/backend/Dockerfile`,
-    `apps/frontend/Dockerfile` + `nginx.conf` (proxy `/api` → `backend:3000`, SPA fallback), `.env.example`, `.nvmrc`.
-    Stale DB volume between branches → README says `docker compose down -v`. `POST /api/dev/reset` enabled unless `ENABLE_DEV_RESET=false`; truncates tables then reseeds in one DB transaction.
+11. **Runtime files:** `docker-compose.yml` (Postgres only, with healthcheck; apps run on the host, backend retries DB connect), `.nvmrc`.
+    Stale DB volume between branches → README says `npm run db:reset`. `POST /api/dev/reset` enabled unless `ENABLE_DEV_RESET=false`; truncates tables then reseeds in one DB transaction.
 12. **MCP:** tool inputs are zod schemas; each tool maps args → the same Command/Query class. Default `limit` for list tools = 10 (max 100).
     Tool descriptions written for an LLM. Connect via `.mcp.json` (Claude Code, type http `http://localhost:3000/mcp`) and Claude Desktop via `npx mcp-remote` (documented only).
     Pin `@rekog/mcp-nest`, verify on Nest 11 early (context7).
