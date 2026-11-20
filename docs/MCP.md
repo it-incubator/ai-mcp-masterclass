@@ -3,7 +3,7 @@
 The backend (branch `03-use-cases-mcp`) exposes the use cases as MCP tools over **Streamable HTTP** at
 `http://localhost:3000/mcp` (REST stays under `/api`). No auth: local demo only.
 
-Start the stack first: `docker compose up --build` (or `npm run dev:db` + `npm run dev:backend`), then reset the demo data if you like:
+Start the stack first: `npm run setup` once, then `npm run dev`, then reset the demo data if you like:
 `curl -X POST http://localhost:3000/api/dev/reset`.
 
 ## Claude Code
