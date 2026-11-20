@@ -9,10 +9,11 @@ A small fintech back-office ("Ledger Admin": customers, accounts, transactions) 
 
 ## Run it (students)
 
-Requirements: Docker Desktop (Compose v2). For local dev and e2e also Node 22+ (`.nvmrc`).
+Requirements: Node 20.19+ or 22.12+ (`.nvmrc` pins 22) and Docker Desktop (used only for Postgres).
 
 ```bash
-docker compose up --build
+npm run setup   # once: install dependencies + start Postgres in Docker
+npm run dev     # backend + frontend with hot reload
 ```
 
 | What | URL |
@@ -21,21 +22,13 @@ docker compose up --build
 | REST API / Swagger | http://localhost:3000/api · http://localhost:3000/api/docs |
 | Postgres | localhost:5433 (`ledger` / `ledger` / `ledger`) |
 
-Ports busy? Copy `.env.example` to `.env` and change `BACKEND_PORT`, `FRONTEND_PORT`, `DB_HOST_PORT`.
 Data is seeded automatically on first start. Reset it any time: `npm run reset-data`.
+Next day / after reboot: `npm run dev:db && npm run dev` (or just `npm run dev` if Postgres is still running).
 
-**Switching branches:** the DB schema is `synchronize`d, so after switching run `docker compose down -v` before `up --build`.
-
-### Local dev without Docker for the apps
-```bash
-npm run install:all
-npm run dev:db          # postgres only
-npm run dev:backend     # http://localhost:3000
-npm run dev:frontend    # http://localhost:5180
-```
+**Switching branches:** the DB schema is `synchronize`d, so after switching run `npm run db:reset` (wipes the database volume) before `npm run dev`.
 
 ### E2E tests (Playwright)
-With the stack running: `npm run e2e` (see `e2e/README.md`).
+With `npm run dev` running: `npm run e2e` (see `e2e/README.md`).
 
 ## Branches
 
