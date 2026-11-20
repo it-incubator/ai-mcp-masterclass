@@ -23,9 +23,17 @@ npm run dev     # backend + frontend with hot reload
 | Postgres | localhost:5433 (`ledger` / `ledger` / `ledger`) |
 
 Data is seeded automatically on first start. Reset it any time: `npm run reset-data`.
-Next day / after reboot: `npm run dev:db && npm run dev` (or just `npm run dev` if Postgres is still running).
+Next day / after reboot: just `npm run dev` (it starts Postgres if needed).
 
 **Switching branches:** the DB schema is `synchronize`d, so after switching run `npm run db:reset` (wipes the database volume) before `npm run dev`.
+
+### Troubleshooting
+- `Cannot continue: Node ... is not supported` – install Node 20.19+ or 22.12+ (`nvm install 22`).
+- `Docker is not available` – start Docker Desktop, wait until it is running, retry.
+- `Port 3000/5180 is already in use` – another copy of `npm run dev` (or another app) is running; stop it.
+- `port is already allocated` for 5433 – another Postgres uses that port; stop it.
+- Empty/odd data after switching branches – `npm run db:reset`.
+- An `EBADENGINE` warning for `react-router` on Node 20 is harmless.
 
 ### E2E tests (Playwright)
 With `npm run dev` running: `npm run e2e` (see `e2e/README.md`).

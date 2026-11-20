@@ -8,8 +8,8 @@
   },
   "scripts": {
     "install:all": "npm --prefix apps/backend install && npm --prefix apps/frontend install && npm --prefix e2e install",
-    "setup": "npm install && npm run install:all && npm run dev:db",
-    "dev": "concurrently -k -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "setup": "node scripts/check-env.mjs && npm install && npm run install:all && npm run dev:db",
+    "dev": "node scripts/check-env.mjs --ports && npm run dev:db && concurrently -k -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
     "dev:db": "docker compose up -d --wait db",
     "db:reset": "docker compose down -v && npm run dev:db",
     "dev:backend": "npm --prefix apps/backend run start:dev",
