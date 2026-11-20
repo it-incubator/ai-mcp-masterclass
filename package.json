@@ -3,14 +3,21 @@
   "private": true,
   "version": "1.0.0",
   "description": "Master class: admin panel vs AI + MCP (NestJS + React)",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "install:all": "npm --prefix apps/backend install && npm --prefix apps/frontend install && npm --prefix e2e install",
-    "dev:db": "docker compose up -d db",
+    "setup": "npm install && npm run install:all && npm run dev:db",
+    "dev": "concurrently -k -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:db": "docker compose up -d --wait db",
+    "db:reset": "docker compose down -v && npm run dev:db",
     "dev:backend": "npm --prefix apps/backend run start:dev",
     "dev:frontend": "npm --prefix apps/frontend run dev",
-    "build": "npm --prefix apps/backend run build && npm --prefix apps/frontend run build",
     "e2e": "npm --prefix e2e test",
     "reset-data": "curl -fsS -X POST http://localhost:3000/api/dev/reset"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5"
   }
 }

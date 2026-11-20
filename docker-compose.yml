@@ -2,41 +2,18 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-ledger}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ledger}
-      POSTGRES_DB: ${POSTGRES_DB:-ledger}
+      POSTGRES_USER: ledger
+      POSTGRES_PASSWORD: ledger
+      POSTGRES_DB: ledger
     ports:
-      - "${DB_HOST_PORT:-5433}:5432"
+      - "5433:5432"
     volumes:
       - ledger-db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ledger} -d ${POSTGRES_DB:-ledger}"]
+      test: ["CMD-SHELL", "pg_isready -U ledger -d ledger"]
       interval: 3s
       timeout: 3s
       retries: 20
-
-  backend:
-    build: ./apps/backend
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER:-ledger}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-ledger}
-      DB_NAME: ${POSTGRES_DB:-ledger}
-      PORT: 3000
-      ENABLE_DEV_RESET: ${ENABLE_DEV_RESET:-true}
-    ports:
-      - "${BACKEND_PORT:-3000}:3000"
-    depends_on:
-      db:
-        condition: service_healthy
-
-  frontend:
-    build: ./apps/frontend
-    ports:
-      - "${FRONTEND_PORT:-5180}:80"
-    depends_on:
-      - backend
 
 volumes:
   ledger-db:

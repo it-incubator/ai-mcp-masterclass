@@ -13,5 +13,5 @@ export default async function globalSetup() {
     }
     await new Promise((r) => setTimeout(r, 1000));
   }
-  throw new Error(`Backend ${API_URL}/health not ready: ${last}. Is the stack up (docker compose up -d)?`);
+  throw new Error(`Backend ${API_URL}/health not ready: ${last}. Is the stack up (npm run dev)?`);
 }

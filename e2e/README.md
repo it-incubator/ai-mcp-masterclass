@@ -5,7 +5,7 @@ setup/verification (`POST /api/dev/reset`, reading ids and balances).
 
 ## Prerequisites
 
-- The stack is up: `docker compose up --build -d` from the repo root (frontend http://localhost:5180, backend http://localhost:3000/api).
+- The stack is up: `npm run dev` from the repo root (after `npm run setup`) (frontend http://localhost:5180, backend http://localhost:3000/api).
 - Node 22+.
 - One-time, local only: `npm --prefix e2e install && npx --prefix e2e playwright install chromium`.
 
